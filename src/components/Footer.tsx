@@ -39,8 +39,32 @@ export default function Footer() {
           </div>
           
           <div className="pt-4 border-t border-gray-200 mt-6">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-2">
+              <a 
+                href="/terms" 
+                className="text-xs text-gray-600 hover:text-gray-800 underline"
+              >
+                Ketentuan Layanan
+              </a>
+              <span className="hidden sm:inline text-xs text-gray-400">|</span>
+              <a 
+                href="/privacy" 
+                className="text-xs text-gray-600 hover:text-gray-800 underline"
+              >
+                Kebijakan Privasi
+              </a>
+              <span className="hidden sm:inline text-xs text-gray-400">|</span>
+              <a 
+                href="https://github.com/RAYDENFLY/BPA-Business-Planning-App" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-600 hover:text-gray-800 underline"
+              >
+                Open Source (MIT)
+              </a>
+            </div>
             <p className="text-xs text-gray-500">
-              © 2025 Aplikasi Perencanaan Bisnis UKM. 
+              © 2025 Aplikasi Perencanaan Bisnis UKM - RAYDENFLY. 
               <span className="font-medium"> Open for collaboration & custom development.</span>
             </p>
           </div>

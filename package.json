@@ -2,6 +2,13 @@
   "name": "est",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "author": "RAYDENFLY - Authentic Media Services",
+  "description": "Business Planning Application for SMEs - A comprehensive tool for business planning, financial projections, and scenario analysis",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RAYDENFLY/BPA-Business-Planning-App.git"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",

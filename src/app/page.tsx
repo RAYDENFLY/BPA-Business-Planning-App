@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Briefcase, Plus, BarChart3, Play, Download, Target, Users, Package, DollarSign } from 'lucide-react';
 import { useBusinessStore } from '@/store/businessStore';
+import { usePageLogger } from '@/hooks/usePageLogger';
 import ProductForm from '@/components/ProductForm';
 import EmployeeForm from '@/components/EmployeeForm';
 import CostForm from '@/components/CostForm';
@@ -15,6 +16,7 @@ import Footer from '@/components/Footer';
 type TabType = 'products' | 'employees' | 'costs' | 'targets' | 'analysis' | 'scenarios' | 'export';
 
 export default function Home() {
+  usePageLogger(); // Log page visits
   const { currentPlan, createNewPlan } = useBusinessStore();
   const [activeTab, setActiveTab] = useState<TabType>('products');
   const [showCreateForm, setShowCreateForm] = useState(!currentPlan);
