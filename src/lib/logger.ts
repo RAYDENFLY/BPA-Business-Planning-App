@@ -80,7 +80,7 @@ export function getAccessLogs(days: number = 30): AccessLog[] {
           try {
             const logEntry = JSON.parse(line);
             logs.push(logEntry);
-          } catch (error) {
+          } catch {
             console.warn('Failed to parse log line:', line);
           }
         }

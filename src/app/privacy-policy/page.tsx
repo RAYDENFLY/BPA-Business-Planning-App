@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Shield, CheckCircle, Search, Lock, Github, Calendar, ExternalLink, Server } from 'lucide-react';
 import { usePageLogger } from '@/hooks/usePageLogger';
 
@@ -111,18 +112,18 @@ export default function PrivacyPolicy() {
           {/* Footer */}
           <div className="border-t pt-6 mt-8">
             <div className="flex justify-between items-center">
-              <a 
+              <Link 
                 href="/terms-of-service"
                 className="text-green-600 hover:text-green-700 font-medium"
               >
                 ← Ketentuan Layanan
-              </a>
-              <a 
+              </Link>
+              <Link 
                 href="/"
                 className="text-green-600 hover:text-green-700 font-medium"
               >
                 Kembali ke Aplikasi →
-              </a>
+              </Link>
             </div>
           </div>
         </div>

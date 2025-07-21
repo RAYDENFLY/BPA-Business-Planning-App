@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  Eye, Users, Globe, Clock, TrendingUp, Download, 
-  RefreshCw, Calendar, MapPin, Monitor, LogOut 
+  Eye, Users, Globe, Clock, Download, 
+  RefreshCw, MapPin, Monitor, LogOut 
 } from 'lucide-react';
 import { usePageLogger } from '@/hooks/usePageLogger';
 
@@ -44,7 +44,7 @@ export default function AdminLogs() {
   const [days, setDays] = useState(7);
   const router = useRouter();
 
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`/api/admin/logs?page=${page}&days=${days}&limit=50`);
@@ -60,16 +60,16 @@ export default function AdminLogs() {
       } else {
         setError('Failed to fetch logs');
       }
-    } catch (error) {
+    } catch {
       setError('Connection error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, days, router]);
 
   useEffect(() => {
     fetchLogs();
-  }, [page, days]);
+  }, [page, days, fetchLogs]);
 
   const formatDate = (timestamp: string) => {
     return new Date(timestamp).toLocaleString('id-ID', {

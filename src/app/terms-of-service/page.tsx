@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { FileText, Shield, Github, Calendar, Users, Eye } from 'lucide-react';
 import { usePageLogger } from '@/hooks/usePageLogger';
 
@@ -83,12 +84,12 @@ export default function TermsOfService() {
           {/* Footer */}
           <div className="border-t pt-6 mt-8">
             <div className="flex justify-between items-center">
-              <a 
+              <Link 
                 href="/"
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
                 ← Kembali ke Aplikasi
-              </a>
+              </Link>
               <a 
                 href="/privacy-policy"
                 className="text-blue-600 hover:text-blue-700 font-medium"

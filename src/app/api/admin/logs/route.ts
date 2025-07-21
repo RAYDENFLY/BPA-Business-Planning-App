@@ -20,7 +20,7 @@ function verifyAdminToken(request: NextRequest): boolean {
     const isNotExpired = (now - tokenTime) < eightHours;
     
     return isValidUser && isNotExpired;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -28,7 +28,7 @@ function verifyAdminToken(request: NextRequest): boolean {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { timestamp, path, userAgent, sessionId, referrer } = body;
+    const { timestamp, path, userAgent, sessionId } = body;
     
     // Basic validation
     if (!timestamp || !path || !userAgent || !sessionId) {

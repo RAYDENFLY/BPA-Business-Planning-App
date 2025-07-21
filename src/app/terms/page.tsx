@@ -80,7 +80,7 @@ export default function TermsOfService() {
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Disclaimer</h2>
               <div className="p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg">
                 <p className="text-gray-700 leading-relaxed">
-                  <strong>Penting:</strong> Aplikasi ini disediakan "sebagaimana adanya" tanpa jaminan 
+                  <strong>Penting:</strong> Aplikasi ini disediakan &ldquo;sebagaimana adanya&rdquo; tanpa jaminan 
                   apapun, baik tersurat maupun tersirat. Hasil simulasi dan proyeksi yang dihasilkan 
                   hanya bersifat informatif dan tidak boleh dijadikan sebagai satu-satunya dasar 
                   pengambilan keputusan bisnis.
