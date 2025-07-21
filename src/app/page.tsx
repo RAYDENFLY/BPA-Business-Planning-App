@@ -10,6 +10,7 @@ import TargetForm from '@/components/TargetForm';
 import AnalysisCharts from '@/components/AnalysisCharts';
 import WhatIfScenario from '@/components/WhatIfScenario';
 import ExportData from '@/components/ExportData';
+import Footer from '@/components/Footer';
 
 type TabType = 'products' | 'employees' | 'costs' | 'targets' | 'analysis' | 'scenarios' | 'export';
 
@@ -52,54 +53,59 @@ export default function Home() {
 
   if (showCreateForm) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Briefcase className="w-8 h-8 text-blue-600" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">Business Planning App</h1>
-            <p className="text-gray-600">
-              Alat bantu perencanaan bisnis untuk UKM. Analisis kelayakan, proyeksi keuangan, dan target realistis.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nama Business Plan
-              </label>
-              <input
-                type="text"
-                value={newPlanName}
-                onChange={(e) => setNewPlanName(e.target.value)}
-                placeholder="Contoh: Aplikasi Kasir Online"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onKeyPress={(e) => e.key === 'Enter' && handleCreatePlan()}
-              />
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Briefcase className="w-8 h-8 text-blue-600" />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-800 mb-2">Business Planning App</h1>
+              <p className="text-gray-600">
+                Alat bantu perencanaan bisnis untuk UKM. Analisis kelayakan, proyeksi keuangan, dan target realistis.
+              </p>
             </div>
 
-            <button
-              onClick={handleCreatePlan}
-              disabled={!newPlanName.trim()}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-            >
-              <Plus className="w-4 h-4" />
-              Buat Business Plan Baru
-            </button>
-          </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nama Business Plan
+                </label>
+                <input
+                  type="text"
+                  value={newPlanName}
+                  onChange={(e) => setNewPlanName(e.target.value)}
+                  placeholder="Contoh: Aplikasi Kasir Online"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  onKeyPress={(e) => e.key === 'Enter' && handleCreatePlan()}
+                />
+              </div>
 
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-medium text-blue-800 mb-2">✨ Fitur Utama</h3>
-            <ul className="text-sm text-blue-700 space-y-1">
-              <li>• Input produk, karyawan, dan biaya</li>
-              <li>• Proyeksi keuangan otomatis</li>
-              <li>• Analisis break-even point & ROI</li>
-              <li>• Simulasi skenario &quot;what-if&quot;</li>
-              <li>• Export ke PDF & Excel</li>
-            </ul>
+              <button
+                onClick={handleCreatePlan}
+                disabled={!newPlanName.trim()}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              >
+                <Plus className="w-4 h-4" />
+                Buat Business Plan Baru
+              </button>
+            </div>
+
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+              <h3 className="font-medium text-blue-800 mb-2">✨ Fitur Utama</h3>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• Input produk, karyawan, dan biaya</li>
+                <li>• Proyeksi keuangan otomatis</li>
+                <li>• Analisis break-even point & ROI</li>
+                <li>• Simulasi skenario &quot;what-if&quot;</li>
+                <li>• Export ke PDF & Excel</li>
+              </ul>
+            </div>
           </div>
         </div>
+        
+        {/* Footer */}
+        <Footer />
       </div>
     );
   }
@@ -191,13 +197,7 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="text-center text-sm text-gray-500">
-            <p>© 2025 Business Planning App - Alat bantu perencanaan bisnis untuk UKM</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
