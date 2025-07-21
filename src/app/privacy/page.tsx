@@ -153,7 +153,7 @@ export default function PrivacyPolicy() {
                     href="mailto:support@raydenfly.com" 
                     className="text-blue-600 hover:text-blue-800 ml-1 underline"
                   >
-                    support@raydenfly.com
+                    raydenlfy84@gmail.com
                   </a>
                 </p>
                 <p className="text-sm text-gray-600 mt-1">
@@ -164,7 +164,7 @@ export default function PrivacyPolicy() {
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:text-blue-800 ml-1 underline"
                   >
-                    +62 851-7202-8463
+                    +62 857-1941-9252
                   </a>
                 </p>
               </div>

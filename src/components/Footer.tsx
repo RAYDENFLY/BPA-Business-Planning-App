@@ -28,13 +28,13 @@ export default function Footer() {
             </a>
             
             <a 
-              href="mailto:raydnelfy84@gmail.com" 
+              href="mailto:raydenfly84@gmail.com" 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Mail className="w-4 h-4" />
-              raydnelfy84@gmail.com
+              raydenfly84@gmail.com
             </a>
           </div>
           
