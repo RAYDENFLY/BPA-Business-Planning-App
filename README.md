@@ -1,190 +1,199 @@
-# Business Planning App
+# Business Planning App (BPA) 🚀
 
-Aplikasi perencanaan bisnis untuk UKM (Usaha Kecil dan Menengah) yang membantu pemilik usaha dalam merencanakan bisnis, mengevaluasi kelayakan, dan menyusun target realistis.
+A comprehensive Next.js application for business planning, ROI simulation, and financial projections designed specifically for Small and Medium Enterprises (SMEs).
 
-## 🎯 Tujuan Aplikasi
+## 🌟 Features
 
-Alat bantu pemilik usaha kecil/menengah untuk:
-- Merencanakan bisnis secara sistematis
-- Mengevaluasi kelayakan usaha 
-- Menyusun target yang realistis
-- Melakukan proyeksi keuangan
-- Analisis skenario "what-if"
+- **ROI Simulator**: Advanced financial calculations with outlet management
+- **Business Planning**: Comprehensive tools for business analysis
+- **Financial Projections**: Multi-scenario forecasting capabilities  
+- **Export & Sharing**: PDF exports and simulation sharing via unique codes
+- **Responsive Design**: Mobile-first approach for all devices
+- **Real-time Data**: Powered by Supabase for scalable, real-time database operations
 
-## ✨ Fitur Utama
+## 🔧 Tech Stack
 
-### 📦 1. Input Produk & Revenue
-- Form input produk dengan nama, harga, dan jenis (subscription/sekali beli/jasa)
-- Estimasi penjualan per bulan dan target growth
-- Pengaturan komisi sales per produk
-- Support multiple produk
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Styling**: Tailwind CSS 4
+- **Database**: Supabase (PostgreSQL)
+- **Charts**: Chart.js & React-ChartJS-2
+- **Icons**: Lucide React
+- **Export**: jsPDF with html2canvas
+- **Deployment**: Vercel-ready
 
-### 🧑‍💼 2. Input Karyawan & Sales Team  
-- Management tim dengan role yang beragam (Developer, Sales, Admin, Marketing, dll.)
-- Fleksibilitas pembayaran: gaji tetap atau komisi
-- Tracking kontribusi dan komisi per karyawan
-- Support multiple anggota tim
+## 🏗️ Database Migration
 
-### 💸 3. Input Biaya Tetap & Variabel
-**Biaya Tetap:**
-- Sewa, Internet & listrik, Server/Hosting
-- Gaji admin, Tools/Software, dan lainnya
+**✅ MIGRATED FROM SQLITE TO SUPABASE**
 
-**Biaya Variabel:**
-- Biaya produksi per unit
-- Fee payment gateway (%)
-- Biaya support/customer service
-- Komisi sales berdasarkan revenue
-- Biaya iklan
+This project has been successfully migrated from SQLite to Supabase for better scalability and cloud-native features.
 
-### 📈 4. Target & Pertumbuhan
-- Pengaturan target omzet akhir
-- Periode proyeksi (6-36 bulan)
-- Pertumbuhan revenue dan biaya operasional per bulan
-- Sales closing rate estimation
-- Inflasi biaya/server untuk SaaS
+### Supabase Configuration
+- **Project URL**: `https://lzynzuyrefhnkajqpchx.supabase.co`
+- **Environment Variables**: Already configured in `.env.local`
 
-### 📊 5. Output / Hasil Simulasi
-**Grafik & Data:**
-- Revenue vs Biaya vs Profit (line chart)
-- Perbandingan bulanan (bar chart)
-- Break-even point analysis
-- Akumulasi profit
-- ROI calculation
-- Laporan detail proyeksi
+For detailed migration information, see [SUPABASE_MIGRATION.md](./SUPABASE_MIGRATION.md)
 
-**Perhitungan Otomatis:**
-- Total gaji (tetap + komisi)
-- Biaya operasional
-- Pendapatan bersih
-- Laba bersih
-- Return on Investment
+## 🚀 Quick Start
 
-### 🧪 6. Skenario "What If"
-- Simulasi kenaikan harga produk
-- Pengurangan biaya operasional  
-- Penambahan karyawan baru
-- Perubahan komisi sales
-- Perbandingan hasil dengan baseline
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Supabase account (free tier works)
 
-### 📄 7. Export Data
-- **PDF:** Laporan lengkap siap presentasi
-- **Excel:** Data detail untuk analisis lanjutan
-- Multiple worksheets terorganisir
-- Format professional
+### Installation
 
-## 🛠️ Teknologi
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/RAYDENFLY/BPA-Business-Planning-App.git
+   cd BPA-Business-Planning-App
+   ```
 
-- **Framework:** Next.js 15 dengan App Router
-- **Language:** TypeScript untuk type safety
-- **Styling:** Tailwind CSS
-- **Charts:** Chart.js dengan React-Chartjs-2
-- **Forms:** React Hook Form dengan Zod validation
-- **State Management:** Zustand dengan persistence
-- **Export:** jsPDF untuk PDF, SheetJS untuk Excel
-- **Icons:** Lucide React
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-## 🚀 Cara Menjalankan
+3. **Set up Supabase Database**
+   
+   Go to your Supabase project and run this SQL in the SQL Editor:
+   ```sql
+   -- Create simulations table
+   CREATE TABLE IF NOT EXISTS simulations (
+     id BIGSERIAL PRIMARY KEY,
+     code TEXT UNIQUE NOT NULL,
+     name TEXT NOT NULL,
+     data TEXT NOT NULL,
+     results TEXT NOT NULL,
+     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+   );
 
-1. **Clone dan Install Dependencies**
-```bash
-npm install
-```
+   -- Create indexes for better performance
+   CREATE INDEX IF NOT EXISTS idx_simulations_code ON simulations(code);
+   CREATE INDEX IF NOT EXISTS idx_simulations_created_at ON simulations(created_at);
 
-2. **Run Development Server**
-```bash
-npm run dev
-```
+   -- Enable Row Level Security
+   ALTER TABLE simulations ENABLE ROW LEVEL SECURITY;
 
-3. **Buka di Browser**
-```
-http://localhost:3000
-```
+   -- Create policy for public access (demo purposes)
+   CREATE POLICY "Allow all operations for simulations" ON simulations
+     FOR ALL TO anon USING (true) WITH CHECK (true);
 
-## 📋 Cara Penggunaan
+   -- Auto-update timestamp function
+   CREATE OR REPLACE FUNCTION update_updated_at_column()
+   RETURNS TRIGGER AS $$
+   BEGIN
+     NEW.updated_at = NOW();
+     RETURN NEW;
+   END;
+   $$ language 'plpgsql';
 
-1. **Buat Business Plan Baru**
-   - Masukkan nama business plan
-   - Klik "Buat Business Plan Baru"
+   -- Trigger for auto-updating timestamps
+   CREATE TRIGGER update_simulations_updated_at 
+     BEFORE UPDATE ON simulations 
+     FOR EACH ROW 
+     EXECUTE FUNCTION update_updated_at_column();
+   ```
 
-2. **Input Data Secara Berurutan**
-   - **Produk & Revenue:** Tambahkan produk/jasa yang akan dijual
-   - **Karyawan & Sales:** Input tim dan struktur pembayaran
-   - **Biaya:** Masukkan biaya tetap dan variabel
-   - **Target & Growth:** Set target omzet dan proyeksi pertumbuhan
+4. **Environment Variables**
+   
+   Environment variables are already configured in `.env.local`:
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=https://lzynzuyrefhnkajqpchx.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
+   ```
 
-3. **Analisis Hasil**
-   - Lihat grafik proyeksi di tab "Analisis & Grafik"
-   - Jalankan simulasi skenario di tab "What-If Scenario"
-   - Export laporan di tab "Export Data"
+5. **Run the development server**
+   ```bash
+   npm run dev
+   ```
 
-## 🎨 Screenshots
+6. **Open in browser**
+   ```
+   http://localhost:3000
+   ```
 
-### Dashboard Utama
-- Tabs navigasi dengan progress indicator
-- Form input yang user-friendly
-- Real-time calculation
+## 📱 Features Overview
 
-### Analisis & Grafik
-- Interactive charts dengan Chart.js
-- Key metrics display
+### ROI Simulator
+- Comprehensive financial calculations
+- Multiple outlet management  
+- Scenario-based projections (optimistic, realistic, pessimistic)
 - Break-even analysis
-- Detail table proyeksi
+- Export to PDF
 
-### What-If Scenarios
-- Side-by-side comparison
-- Insights dan recommendations
-- Multiple scenario testing
+### Business Planning
+- Market analysis tools
+- Cost-benefit analysis
+- Risk assessment
+- Financial forecasting
 
-## 🔧 Development
+### Data Management
+- Save simulations with unique codes
+- Load and compare simulations
+- Export data to various formats
+- Real-time data synchronization
 
-### Project Structure
-```
-src/
-├── app/                 # Next.js App Router
-├── components/         # React Components
-│   ├── ProductForm.tsx
-│   ├── EmployeeForm.tsx
-│   ├── CostForm.tsx
-│   ├── TargetForm.tsx
-│   ├── AnalysisCharts.tsx
-│   ├── WhatIfScenario.tsx
-│   └── ExportData.tsx
-├── store/              # Zustand Store
-│   └── businessStore.ts
-└── types/              # TypeScript Types
-    └── business.ts
-```
+## 🌐 API Endpoints
 
-### Key Features Implementation
-- **Responsive Design:** Mobile-first approach
-- **Form Validation:** Comprehensive validation dengan Zod
-- **Data Persistence:** Local storage dengan Zustand persist
-- **Type Safety:** Full TypeScript coverage
-- **Performance:** Optimized calculations dan memoization
+### Simulations
+- `POST /api/simulations` - Save new simulation
+- `GET /api/simulations/[code]` - Get simulation by code
+- `GET /api/simulations/list` - Get all simulations
 
-## 🚢 Build & Deploy
+### Admin (if applicable)
+- `POST /api/admin/login` - Admin authentication
+- `GET /api/admin/logs` - System logs
 
-```bash
-# Build for production
-npm run build
+## 🔐 Security
 
-# Start production server
-npm start
-```
+- Row Level Security (RLS) enabled on Supabase
+- Environment variables for sensitive data
+- Input validation and sanitization
+- Secure API endpoints
 
-## 📝 License
+## 📊 Performance
 
-MIT License - Silakan gunakan untuk keperluan komersial maupun non-komersial.
+- Server-side rendering with Next.js 15
+- Optimized database queries
+- Image optimization
+- Code splitting and lazy loading
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+1. Push to GitHub
+2. Connect to Vercel
+3. Add environment variables
+4. Deploy automatically
+
+### Other Platforms
+- Compatible with any Node.js hosting platform
+- Docker support available
+- Static export option for CDN deployment
 
 ## 🤝 Contributing
 
-Kontribusi sangat diterima! Silakan buat issue atau pull request untuk perbaikan dan fitur baru.
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
-## 📞 Support
+## 📄 License
 
-Untuk pertanyaan atau dukungan, silakan buat issue di repository ini.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+- **Documentation**: [SUPABASE_MIGRATION.md](./SUPABASE_MIGRATION.md)
+- **Issues**: [GitHub Issues](https://github.com/RAYDENFLY/BPA-Business-Planning-App/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/RAYDENFLY/BPA-Business-Planning-App/discussions)
+
+## 🏆 Credits
+
+Developed by **RAYDENFLY - Authentic Media Services**
 
 ---
 
-**Business Planning App** - Membantu UKM merencanakan masa depan bisnis yang lebih baik! 🚀
+**Made with ❤️ for the SME community**

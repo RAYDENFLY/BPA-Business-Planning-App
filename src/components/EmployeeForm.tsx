@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Trash2, Users } from 'lucide-react';
+import { Plus, Trash2, Users, X } from 'lucide-react';
 import { useBusinessStore } from '@/store/businessStore';
 import { Employee } from '@/types/business';
 
@@ -24,6 +24,8 @@ type EmployeeFormData = z.infer<typeof employeeSchema>;
 export default function EmployeeForm() {
   const { currentPlan, addEmployee, updateEmployee, removeEmployee } = useBusinessStore();
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [salaryDisplay, setSalaryDisplay] = useState<string>('');
+  const [commissionDisplay, setCommissionDisplay] = useState<string>('');
   
   const {
     register,
@@ -31,6 +33,7 @@ export default function EmployeeForm() {
     reset,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema),
     defaultValues: {
@@ -87,6 +90,36 @@ export default function EmployeeForm() {
       minimumFractionDigits: 0,
     }).format(amount);
   };
+
+  // Format numbers with dot separators for input display
+  const formatNumberWithSeparators = (value: number): string => {
+    if (value === 0) return ''
+    return new Intl.NumberFormat('id-ID').format(value)
+  }
+
+  // Parse formatted input back to number
+  const handleFormattedInput = (value: string): number => {
+    const numericValue = value.replace(/[^\d]/g, '')
+    return numericValue === '' ? 0 : Number(numericValue)
+  }
+
+  // Format currency for readable display (Rp X Miliar/Juta format)
+  const formatCurrencyDisplay = (value: number): string => {
+    if (value === 0) return ''
+    
+    if (value >= 1000000000) {
+      const billions = value / 1000000000
+      return `Rp ${billions.toFixed(billions >= 10 ? 0 : 1)} Miliar`
+    } else if (value >= 1000000) {
+      const millions = value / 1000000
+      return `Rp ${millions.toFixed(millions >= 10 ? 0 : 1)} Juta`
+    } else if (value >= 1000) {
+      const thousands = value / 1000
+      return `Rp ${thousands.toFixed(thousands >= 10 ? 0 : 1)} Ribu`
+    } else {
+      return `Rp ${value.toLocaleString('id-ID')}`
+    }
+  }
 
   const roleOptions = [
     'Developer',
@@ -165,11 +198,28 @@ export default function EmployeeForm() {
                 Gaji per Bulan (Rp) *
               </label>
               <input
-                {...register('salary', { valueAsNumber: true })}
-                type="number"
+                type="text"
+                value={salaryDisplay}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSalaryDisplay(value);
+                  const numericValue = handleFormattedInput(value);
+                  setValue('salary', numericValue);
+                }}
+                onBlur={(e) => {
+                  const numericValue = handleFormattedInput(e.target.value);
+                  if (numericValue > 0) {
+                    setSalaryDisplay(formatNumberWithSeparators(numericValue));
+                  }
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900"
-                placeholder="5000000"
+                placeholder="5.000.000"
               />
+              {watch('salary') && watch('salary')! > 0 && (
+                <p className="text-xs text-gray-500 mt-1">
+                  {formatCurrencyDisplay(watch('salary')!)}
+                </p>
+              )}
               {errors.salary && (
                 <p className="text-red-500 text-sm mt-1">{errors.salary.message}</p>
               )}
@@ -247,8 +297,9 @@ export default function EmployeeForm() {
             <button
               type="button"
               onClick={handleCancel}
-              className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
             >
+              <X className="w-4 h-4" />
               Batal
             </button>
           )}

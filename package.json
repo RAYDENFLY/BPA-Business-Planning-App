@@ -1,6 +1,6 @@
 {
   "name": "est",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": true,
   "license": "MIT",
   "author": "RAYDENFLY - Authentic Media Services",
@@ -17,8 +17,12 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
+    "@supabase/supabase-js": "^2.52.1",
+    "@types/jspdf": "^1.3.3",
     "chart.js": "^4.5.0",
+    "chartjs-adapter-date-fns": "^3.0.0",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "file-saver": "^2.0.5",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Trash2, DollarSign } from 'lucide-react';
+import { Plus, Trash2, DollarSign, X } from 'lucide-react';
 import { useBusinessStore } from '@/store/businessStore';
 import { FixedCost, VariableCost } from '@/types/business';
 
@@ -39,6 +39,38 @@ export default function CostForm() {
   const [activeTab, setActiveTab] = useState<'fixed' | 'variable'>('fixed');
   const [editingFixedId, setEditingFixedId] = useState<string | null>(null);
   const [editingVariableId, setEditingVariableId] = useState<string | null>(null);
+  const [fixedAmountDisplay, setFixedAmountDisplay] = useState<string>('');
+  const [variableValueDisplay, setVariableValueDisplay] = useState<string>('');
+
+  // Format numbers with dot separators for input display
+  const formatNumberWithSeparators = (value: number): string => {
+    if (value === 0) return ''
+    return new Intl.NumberFormat('id-ID').format(value)
+  }
+
+  // Parse formatted input back to number
+  const handleFormattedInput = (value: string): number => {
+    const numericValue = value.replace(/[^\d]/g, '')
+    return numericValue === '' ? 0 : Number(numericValue)
+  }
+
+  // Format currency for readable display (Rp X Miliar/Juta format)
+  const formatCurrencyDisplay = (value: number): string => {
+    if (value === 0) return ''
+    
+    if (value >= 1000000000) {
+      const billions = value / 1000000000
+      return `Rp ${billions.toFixed(billions >= 10 ? 0 : 1)} Miliar`
+    } else if (value >= 1000000) {
+      const millions = value / 1000000
+      return `Rp ${millions.toFixed(millions >= 10 ? 0 : 1)} Juta`
+    } else if (value >= 1000) {
+      const thousands = value / 1000
+      return `Rp ${thousands.toFixed(thousands >= 10 ? 0 : 1)} Ribu`
+    } else {
+      return `Rp ${value.toLocaleString('id-ID')}`
+    }
+  }
   
   // Fixed Cost Form
   const fixedCostForm = useForm<FixedCostFormData>({
@@ -203,11 +235,28 @@ export default function CostForm() {
                   Jumlah per Bulan (Rp) *
                 </label>
                 <input
-                  {...fixedCostForm.register('amount', { valueAsNumber: true })}
-                  type="number"
+                  type="text"
+                  value={fixedAmountDisplay}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFixedAmountDisplay(value);
+                    const numericValue = handleFormattedInput(value);
+                    fixedCostForm.setValue('amount', numericValue);
+                  }}
+                  onBlur={(e) => {
+                    const numericValue = handleFormattedInput(e.target.value);
+                    if (numericValue > 0) {
+                      setFixedAmountDisplay(formatNumberWithSeparators(numericValue));
+                    }
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-900"
-                  placeholder="2000000"
+                  placeholder="2.000.000"
                 />
+                {fixedCostForm.watch('amount') > 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    {formatCurrencyDisplay(fixedCostForm.watch('amount'))}
+                  </p>
+                )}
                 {fixedCostForm.formState.errors.amount && (
                   <p className="text-red-500 text-sm mt-1">{fixedCostForm.formState.errors.amount.message}</p>
                 )}
@@ -226,8 +275,9 @@ export default function CostForm() {
                 <button
                   type="button"
                   onClick={handleCancelFixedCost}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
+                  <X className="w-4 h-4" />
                   Batal
                 </button>
               )}
@@ -328,15 +378,44 @@ export default function CostForm() {
                   Nilai *
                 </label>
                 <input
-                  {...variableCostForm.register('value', { valueAsNumber: true })}
-                  type="number"
+                  type="text"
+                  value={variableValueDisplay}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setVariableValueDisplay(value);
+                    const costType = variableCostForm.watch('type');
+                    
+                    if (costType === 'percentage') {
+                      // For percentage, just parse as decimal number
+                      const numericValue = parseFloat(value.replace(/[^\d.]/g, '')) || 0;
+                      variableCostForm.setValue('value', numericValue);
+                    } else {
+                      // For fixed and per-unit, use formatted input
+                      const numericValue = handleFormattedInput(value);
+                      variableCostForm.setValue('value', numericValue);
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const costType = variableCostForm.watch('type');
+                    if (costType !== 'percentage') {
+                      const numericValue = handleFormattedInput(e.target.value);
+                      if (numericValue > 0) {
+                        setVariableValueDisplay(formatNumberWithSeparators(numericValue));
+                      }
+                    }
+                  }}
                   step="0.1"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-900"
                   placeholder={
                     variableCostForm.watch('type') === 'percentage' ? '2.5' : 
-                    variableCostForm.watch('type') === 'per-unit' ? '5000' : '100000'
+                    variableCostForm.watch('type') === 'per-unit' ? '5.000' : '100.000'
                   }
                 />
+                {variableCostForm.watch('type') !== 'percentage' && variableCostForm.watch('value') > 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    {formatCurrencyDisplay(variableCostForm.watch('value'))}
+                  </p>
+                )}
                 {variableCostForm.formState.errors.value && (
                   <p className="text-red-500 text-sm mt-1">{variableCostForm.formState.errors.value.message}</p>
                 )}
@@ -372,8 +451,9 @@ export default function CostForm() {
                 <button
                   type="button"
                   onClick={handleCancelVariableCost}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
+                  <X className="w-4 h-4" />
                   Batal
                 </button>
               )}

@@ -2,7 +2,7 @@ import React from 'react';
 import { Download, FileText, File } from 'lucide-react';
 import { useBusinessStore } from '@/store/businessStore';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
 // Extend jsPDF type to include autoTable
@@ -22,8 +22,27 @@ export default function ExportData() {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(amount);
   };
+
+  // Format currency for readable display (Rp X Miliar/Juta format)
+  const formatCurrencyDisplay = (value: number): string => {
+    if (value === 0) return 'Rp 0'
+    
+    if (value >= 1000000000) {
+      const billions = value / 1000000000
+      return `Rp ${billions.toFixed(billions >= 10 ? 0 : 1)} Miliar`
+    } else if (value >= 1000000) {
+      const millions = value / 1000000
+      return `Rp ${millions.toFixed(millions >= 10 ? 0 : 1)} Juta`
+    } else if (value >= 1000) {
+      const thousands = value / 1000
+      return `Rp ${thousands.toFixed(thousands >= 10 ? 0 : 1)} Ribu`
+    } else {
+      return `Rp ${value.toLocaleString('id-ID')}`
+    }
+  }
 
   const exportToPDF = () => {
     if (!currentPlan || !analysis) {
@@ -31,18 +50,19 @@ export default function ExportData() {
       return;
     }
 
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.width;
-    
-    // Title
-    doc.setFontSize(20);
-    doc.text('Laporan Analisis Bisnis', pageWidth / 2, 20, { align: 'center' });
-    
-    doc.setFontSize(12);
-    doc.text(`Nama Plan: ${currentPlan.name}`, 20, 35);
-    doc.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 20, 45);
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.width;
+      
+      // Title
+      doc.setFontSize(20);
+      doc.text('Laporan Analisis Bisnis', pageWidth / 2, 20, { align: 'center' });
+      
+      doc.setFontSize(12);
+      doc.text(`Nama Plan: ${currentPlan.name}`, 20, 35);
+      doc.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 20, 45);
 
-    let yPosition = 60;
+      let yPosition = 60;
 
     // Executive Summary
     doc.setFontSize(14);
@@ -61,7 +81,7 @@ export default function ExportData() {
       ['Rata-rata Biaya/Bulan', formatCurrency(analysis.averageMonthlyCosts)],
     ];
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPosition,
       head: [summaryData[0]],
       body: summaryData.slice(1),
@@ -91,7 +111,7 @@ export default function ExportData() {
         ]),
       ];
 
-      doc.autoTable({
+      autoTable(doc, {
         startY: yPosition,
         head: [productData[0]],
         body: productData.slice(1),
@@ -126,7 +146,7 @@ export default function ExportData() {
       ]),
     ];
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPosition,
       head: [projectionData[0]],
       body: projectionData.slice(1),
@@ -154,6 +174,11 @@ export default function ExportData() {
     // Save the PDF
     const fileName = `business-plan-${currentPlan.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(fileName);
+    
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
+    }
   };
 
   const exportToExcel = () => {
@@ -162,7 +187,8 @@ export default function ExportData() {
       return;
     }
 
-    const workbook = XLSX.utils.book_new();
+    try {
+      const workbook = XLSX.utils.book_new();
 
     // Summary Sheet
     const summaryData = [
@@ -274,6 +300,11 @@ export default function ExportData() {
     // Save the Excel file
     const fileName = `business-plan-${currentPlan.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.xlsx`;
     XLSX.writeFile(workbook, fileName);
+    
+    } catch (error) {
+      console.error('Error generating Excel:', error);
+      alert('Terjadi kesalahan saat membuat Excel. Silakan coba lagi.');
+    }
   };
 
   if (!currentPlan) {
@@ -414,7 +445,8 @@ export default function ExportData() {
             <div>
               <span className="font-medium text-gray-700">Total Profit:</span>
               <br />
-              <span className="text-gray-900">{formatCurrency(analysis.totalProfit12Months)}</span>
+              <span className="text-gray-900">{formatCurrencyDisplay(analysis.totalProfit12Months)}</span>
+              <p className="text-xs text-gray-500">{formatCurrency(analysis.totalProfit12Months)}</p>
             </div>
             <div>
               <span className="font-medium text-gray-700">Break Even:</span>

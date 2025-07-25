@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Trash2, Package } from 'lucide-react';
+import { Plus, Trash2, Package, X } from 'lucide-react';
 import { useBusinessStore } from '@/store/businessStore';
 import { Product } from '@/types/business';
 
@@ -23,6 +23,8 @@ type ProductFormData = z.infer<typeof productSchema>;
 export default function ProductForm() {
   const { currentPlan, addProduct, updateProduct, removeProduct } = useBusinessStore();
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [priceDisplay, setPriceDisplay] = useState<string>('');
+  const [commissionDisplay, setCommissionDisplay] = useState<string>('');
   
   const {
     register,
@@ -30,6 +32,7 @@ export default function ProductForm() {
     reset,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -47,6 +50,15 @@ export default function ProductForm() {
 
   const products = currentPlan?.products || [];
   const commissionType = watch('salesCommission.type');
+
+  // Reset commission display when type changes
+  useEffect(() => {
+    if (commissionType === 'percentage') {
+      setCommissionDisplay('');
+    } else {
+      setCommissionDisplay('');
+    }
+  }, [commissionType]);
 
   const onSubmit = (data: ProductFormData) => {
     if (editingId) {
@@ -75,6 +87,36 @@ export default function ProductForm() {
       minimumFractionDigits: 0,
     }).format(amount);
   };
+
+  // Format numbers with dot separators for input display
+  const formatNumberWithSeparators = (value: number): string => {
+    if (value === 0) return ''
+    return new Intl.NumberFormat('id-ID').format(value)
+  }
+
+  // Parse formatted input back to number
+  const handleFormattedInput = (value: string): number => {
+    const numericValue = value.replace(/[^\d]/g, '')
+    return numericValue === '' ? 0 : Number(numericValue)
+  }
+
+  // Format currency for readable display (Rp X Miliar/Juta format)
+  const formatCurrencyDisplay = (value: number): string => {
+    if (value === 0) return ''
+    
+    if (value >= 1000000000) {
+      const billions = value / 1000000000
+      return `Rp ${billions.toFixed(billions >= 10 ? 0 : 1)} Miliar`
+    } else if (value >= 1000000) {
+      const millions = value / 1000000
+      return `Rp ${millions.toFixed(millions >= 10 ? 0 : 1)} Juta`
+    } else if (value >= 1000) {
+      const thousands = value / 1000
+      return `Rp ${thousands.toFixed(thousands >= 10 ? 0 : 1)} Ribu`
+    } else {
+      return `Rp ${value.toLocaleString('id-ID')}`
+    }
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
@@ -106,11 +148,28 @@ export default function ProductForm() {
               Harga per Unit (Rp) *
             </label>
             <input
-              {...register('price', { valueAsNumber: true })}
-              type="number"
+              type="text"
+              value={priceDisplay}
+              onChange={(e) => {
+                const value = e.target.value;
+                setPriceDisplay(value);
+                const numericValue = handleFormattedInput(value);
+                setValue('price', numericValue);
+              }}
+              onBlur={(e) => {
+                const numericValue = handleFormattedInput(e.target.value);
+                if (numericValue > 0) {
+                  setPriceDisplay(formatNumberWithSeparators(numericValue));
+                }
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-              placeholder="500000"
+              placeholder="500.000"
             />
+            {watch('price') > 0 && (
+              <p className="text-xs text-gray-500 mt-1">
+                {formatCurrencyDisplay(watch('price'))}
+              </p>
+            )}
             {errors.price && (
               <p className="text-red-500 text-sm mt-1">{errors.price.message}</p>
             )}
@@ -174,13 +233,38 @@ export default function ProductForm() {
                 <option value="fixed">Nominal</option>
               </select>
               <input
-                {...register('salesCommission.value', { valueAsNumber: true })}
-                type="number"
+                type="text"
+                value={commissionDisplay}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setCommissionDisplay(value);
+                  if (commissionType === 'fixed') {
+                    const numericValue = handleFormattedInput(value);
+                    setValue('salesCommission.value', numericValue);
+                  } else {
+                    // For percentage, just parse as number
+                    const numericValue = parseFloat(value.replace(/[^\d.]/g, '')) || 0;
+                    setValue('salesCommission.value', numericValue);
+                  }
+                }}
+                onBlur={(e) => {
+                  if (commissionType === 'fixed') {
+                    const numericValue = handleFormattedInput(e.target.value);
+                    if (numericValue > 0) {
+                      setCommissionDisplay(formatNumberWithSeparators(numericValue));
+                    }
+                  }
+                }}
                 step="0.1"
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                placeholder={commissionType === 'percentage' ? '5' : '50000'}
+                placeholder={commissionType === 'percentage' ? '5' : '50.000'}
               />
             </div>
+            {commissionType === 'fixed' && watch('salesCommission.value') > 0 && (
+              <p className="text-xs text-gray-500 mt-1">
+                {formatCurrencyDisplay(watch('salesCommission.value'))}
+              </p>
+            )}
             {errors.salesCommission?.value && (
               <p className="text-red-500 text-sm mt-1">{errors.salesCommission.value.message}</p>
             )}
@@ -199,8 +283,9 @@ export default function ProductForm() {
             <button
               type="button"
               onClick={handleCancel}
-              className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
             >
+              <X className="w-4 h-4" />
               Batal
             </button>
           )}
