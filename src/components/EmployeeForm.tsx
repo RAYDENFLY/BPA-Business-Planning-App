@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Plus, Trash2, Users, X } from 'lucide-react';
 import { useBusinessStore } from '@/store/businessStore';
 import { Employee } from '@/types/business';
+import { analytics } from '@/lib/analytics';
 
 const employeeSchema = z.object({
   name: z.string().min(1, 'Nama karyawan wajib diisi'),
@@ -63,9 +64,11 @@ export default function EmployeeForm() {
 
     if (editingId) {
       updateEmployee(editingId, employeeData);
+      analytics.employeeAdded(employeeData.paymentMode); // Track as employee modification
       setEditingId(null);
     } else {
       addEmployee(employeeData);
+      analytics.employeeAdded(employeeData.paymentMode);
     }
     reset();
   };

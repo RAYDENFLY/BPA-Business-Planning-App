@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Calculator, TrendingUp, DollarSign, Settings, BarChart3, Save, FolderOpen, PieChart, Building2, Zap, Target, AlertCircle, Download } from 'lucide-react'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, BarElement, ArcElement } from 'chart.js'
 import { Line, Bar, Doughnut } from 'react-chartjs-2'
+import { analytics } from '@/lib/analytics'
 import SaveLoadModal from '@/components/SaveLoadModal'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, BarElement, ArcElement)
@@ -158,6 +159,7 @@ export default function ROISimulatorPage() {
     localStorage.setItem('saved_simulations', JSON.stringify(savedList))
     
     setSimulationCode(code)
+    analytics.roiSimulationSaved(code)
     showAlert('success', `✅ Simulasi berhasil disimpan dengan kode: ${code}`)
   }
 
@@ -172,6 +174,7 @@ export default function ROISimulatorPage() {
     if (savedData) {
       const simulation = JSON.parse(savedData)
       setData(simulation.data)
+      analytics.roiSimulationLoaded(loadCode.trim())
       showAlert('success', `✅ Simulasi "${simulation.name}" berhasil dimuat!`)
       setLoadCode('')
     } else {
@@ -315,6 +318,10 @@ export default function ROISimulatorPage() {
 
       // Save PDF
       doc.save(`ROI-Simulation-${simulationCode || Date.now()}.pdf`)
+      
+      // Track PDF export
+      analytics.pdfExported(`ROI-Simulation-${simulationCode || 'unsaved'}`)
+      
       showAlert('success', '✅ Laporan PDF berhasil diunduh!')
       
     } catch (error) {
@@ -347,6 +354,13 @@ export default function ROISimulatorPage() {
   
   // Break Even (considering owner's actual take)
   const breakEvenMonths = monthlyOwnerProfit > 0 ? Math.ceil(data.initialInvestment / monthlyOwnerProfit) : null
+
+  // Track ROI calculation when meaningful data is present
+  useEffect(() => {
+    if (data.initialInvestment > 0 && totalMonthlyRevenue > 0) {
+      analytics.roiCalculated(yearlyROI, breakEvenMonths || 0)
+    }
+  }, [data.initialInvestment, totalMonthlyRevenue, data.scenario, data.useOutletMode, yearlyROI, breakEvenMonths])
   
   // Scenario multipliers
   const scenarioMultiplier = {
@@ -513,7 +527,10 @@ export default function ROISimulatorPage() {
                 <span className="hidden sm:inline">Simpan</span>
               </button>
               <button
-                onClick={() => setActiveTab('comparison')}
+                onClick={() => {
+                  setActiveTab('comparison')
+                  analytics.tabSwitched('comparison')
+                }}
                 className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
               >
                 <FolderOpen className="w-4 h-4" />
@@ -606,7 +623,10 @@ export default function ROISimulatorPage() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => {
+                    setActiveTab(tab.id)
+                    analytics.tabSwitched(tab.id)
+                  }}
                   className={`flex items-center gap-2 px-4 py-3 rounded-t-lg transition-colors whitespace-nowrap text-sm ${
                     activeTab === tab.id
                       ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'

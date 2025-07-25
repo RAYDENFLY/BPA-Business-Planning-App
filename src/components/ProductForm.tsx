@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Plus, Trash2, Package, X } from 'lucide-react';
 import { useBusinessStore } from '@/store/businessStore';
 import { Product } from '@/types/business';
+import { analytics } from '@/lib/analytics';
 
 const productSchema = z.object({
   name: z.string().min(1, 'Nama produk wajib diisi'),
@@ -63,9 +64,11 @@ export default function ProductForm() {
   const onSubmit = (data: ProductFormData) => {
     if (editingId) {
       updateProduct(editingId, data);
+      analytics.productUpdated(data.type);
       setEditingId(null);
     } else {
       addProduct(data);
+      analytics.productAdded(data.type);
     }
     reset();
   };

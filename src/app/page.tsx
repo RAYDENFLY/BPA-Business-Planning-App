@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { BarChart3, DollarSign, Target, Users, Briefcase, Plus, ArrowLeft, Package, Play, Download } from 'lucide-react'
 import { useBusinessStore } from '@/store/businessStore';
 import { usePageLogger } from '@/hooks/usePageLogger';
+import { analytics } from '@/lib/analytics';
 import ProductForm from '@/components/ProductForm';
 import EmployeeForm from '@/components/EmployeeForm';
 import CostForm from '@/components/CostForm';
@@ -27,6 +28,7 @@ export default function Home() {
   const handleCreatePlan = () => {
     if (newPlanName.trim()) {
       createNewPlan(newPlanName.trim());
+      analytics.planCreated(newPlanName.trim());
       setShowCreateForm(false);
       setNewPlanName('');
     }
@@ -317,7 +319,10 @@ export default function Home() {
                   return (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
+                      onClick={() => {
+                        setActiveTab(tab.id);
+                        analytics.tabSwitched(tab.label);
+                      }}
                       className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md border-2 border-transparent transition-colors ${getTabColorClasses(tab.color, isActive)}`}
                     >
                       <Icon className="w-4 h-4" />

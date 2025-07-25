@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Plus, Trash2, DollarSign, X } from 'lucide-react';
 import { useBusinessStore } from '@/store/businessStore';
 import { FixedCost, VariableCost } from '@/types/business';
+import { analytics } from '@/lib/analytics';
 
 // Fixed Cost Schema
 const fixedCostSchema = z.object({
@@ -128,6 +129,7 @@ export default function CostForm() {
       setEditingFixedId(null);
     } else {
       addFixedCost(data);
+      analytics.costAdded('fixed', data.category);
     }
     fixedCostForm.reset();
   };
@@ -149,6 +151,7 @@ export default function CostForm() {
       setEditingVariableId(null);
     } else {
       addVariableCost(data);
+      analytics.costAdded('variable', data.type);
     }
     variableCostForm.reset();
   };

@@ -4,6 +4,7 @@ import { useBusinessStore } from '@/store/businessStore';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { analytics } from '@/lib/analytics';
 
 // Extend jsPDF type to include autoTable
 declare module 'jspdf' {
@@ -175,6 +176,9 @@ export default function ExportData() {
     const fileName = `business-plan-${currentPlan.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(fileName);
     
+    // Track PDF export
+    analytics.pdfExported(currentPlan.name);
+    
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
@@ -300,6 +304,9 @@ export default function ExportData() {
     // Save the Excel file
     const fileName = `business-plan-${currentPlan.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.xlsx`;
     XLSX.writeFile(workbook, fileName);
+    
+    // Track Excel export
+    analytics.excelExported(currentPlan.name);
     
     } catch (error) {
       console.error('Error generating Excel:', error);
